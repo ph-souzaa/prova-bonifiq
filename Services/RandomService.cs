@@ -5,23 +5,20 @@ using ProvaPub.Repository;
 namespace ProvaPub.Services
 {
 	public class RandomService
-	{
-		int seed;
+	{   
+        int seed;
         TestDbContext _ctx;
-		public RandomService()
+		public RandomService(TestDbContext ctx)
         {
-            var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
-    .UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Teste;Trusted_Connection=True;")
-    .Options;
+        // está no program entao só precisa passar na dependencia aq
+            _ctx = ctx;
             seed = Guid.NewGuid().GetHashCode();
-
-            _ctx = new TestDbContext(contextOptions);
         }
         public async Task<int> GetRandom()
 		{
             var number =  new Random(seed).Next(100);
             _ctx.Numbers.Add(new RandomNumber() { Number = number });
-            _ctx.SaveChanges();
+            await _ctx.SaveChangesAsync();
 			return number;
 		}
 
