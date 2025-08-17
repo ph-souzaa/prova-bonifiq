@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProvaPub.Models;
+using ProvaPub.Models.Responses;
 using ProvaPub.Repository;
 using ProvaPub.Services;
+using ProvaPub.Services.Interfaces;
 
 namespace ProvaPub.Controllers
 {
@@ -20,16 +22,27 @@ namespace ProvaPub.Controllers
 	[Route("[controller]")]
 	public class Parte3Controller :  ControllerBase
 	{
-		[HttpGet("orders")]
-		public async Task<Order> PlaceOrder(string paymentMethod, decimal paymentValue, int customerId)
-		{
-            var contextOptions = new DbContextOptionsBuilder<TestDbContext>()
-    .UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Teste;Trusted_Connection=True;")
-    .Options;
 
-            using var context = new TestDbContext(contextOptions);
+        private readonly IOrderService _orderService;
 
-            return await new OrderService(context).PayOrder(paymentMethod, paymentValue, customerId);
-		}
-	}
+        public Parte3Controller(IOrderService orderService)
+        {
+            _orderService = orderService;
+        }
+
+
+        [HttpGet("orders")]
+        public async Task<ActionResult<Response<Order>>> PlaceOrder(string paymentMethod,decimal paymentValue,int customerId)
+        {
+            var result = await _orderService.PayOrder(paymentMethod, paymentValue, customerId);
+
+            if (!result.Success || result.Data is null)
+                return BadRequest(Response<Order>.Fail(result.Message));
+
+            var tz = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+            result.Data.OrderDate = TimeZoneInfo.ConvertTimeFromUtc(result.Data.OrderDate, tz);
+
+            return Ok(result);
+        }
+    }
 }
