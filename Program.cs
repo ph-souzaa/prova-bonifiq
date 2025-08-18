@@ -18,7 +18,6 @@ builder.Services.AddDbContext<TestDbContext>(options =>
 
 // Parte 1
 builder.Services.AddScoped<RandomService>();
-
 // Parte 2
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
@@ -27,6 +26,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IPayment, PixPayment>();
 builder.Services.AddScoped<IPayment, CreditCardPayment>();
 builder.Services.AddScoped<IPayment, PaypalPayment>();
+//Parte 4
+builder.Services.AddScoped<IClock, SystemClockService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 var app = builder.Build();
 
